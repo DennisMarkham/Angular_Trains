@@ -1,0 +1,88 @@
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+<style>
+	table, tr, th, td
+	{
+		border-style: solid;
+		border-width: 5px;
+		border-collapse: collapse;
+		padding: 5px;
+	}
+</style>
+<script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl" ng-init = "populate()">
+
+<table>
+	<tr>
+		<th>Name</th>
+		<th>Destination</th>
+		<th>Frequency</th>
+		<th>Minutes Away</th>
+		<th>Next Arrival</th>
+		<th></th>
+	</tr>
+  <tr ng-repeat="x in trains">
+    <td>{{ x.name }}</td>
+    <td>{{ x.dest }}</td>
+    <td>{{ x.freq }}</td>
+    <td>{{ x.away }}</td>
+    <td>{{ x.next }}</td>
+    <td>X</td>
+  </tr>  
+</table>
+<br>
+Name: <input type = "text" ng-model = "name">
+<br>
+Destination: <input type = "text" ng-model = "dest">
+<br>
+Frequency: <input type ="text" ng-model = "freq">
+<br>
+First: <input type = "text" ng-model = "first">
+<br>
+<br>
+<button ng-click = "newTrain()">submit</button>
+</div>
+
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope) {
+$scope.trains = [];
+$scope.nowMinutes = moment().startOf('day').diff()/1000/60;
+$scope.Train = function(name, dest, freq, first)
+{
+this.name = name;
+this.dest = dest;
+this.freq = freq;
+this.first = first;
+this.firstMinutes = moment(this.first, "hh:mm a").diff()/1000/60;
+//now how do we determine what's next.  I think we have to convert the current time into
+//minutes, and the first arrival.  Both as minutes from the start of the day.
+console.log("minutes that have passed since the first arrival of " + this.name + " = " + this.firstMinutes * -1);
+
+
+this.away = this.freq + (this.firstMinutes % this.freq);
+//this.next = moment().format("hh:mm a") + " + " + this.away + " minutes";
+this.next = moment().add(this.away, "minutes").format("hh:mm a");
+};
+
+$scope.populate = function()
+{
+	const thomas = new $scope.Train("Thomas", "Boston", 30, "10:00am")
+
+	$scope.trains.push(thomas);
+	console.log("minutes that have passed since the start of the day: " + $scope.nowMinutes * -1)
+	console.log(moment().format("hh:mm"));
+}
+
+$scope.newTrain = function()
+{
+	let newTrain = new $scope.Train($scope.name, $scope.dest, $scope.freq, $scope.first);
+	$scope.trains.push(newTrain);
+}
+
+  
+});
+</script>
+</body>
